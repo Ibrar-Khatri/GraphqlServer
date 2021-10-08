@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 const _ = require('lodash')
-const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt } = graphql
+const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLID, GraphQLInt, GraphQLList } = graphql
 
 
 var books = [
@@ -40,7 +40,15 @@ const RootQuery = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 // code to get data from db / other source
+                //lodash aik library hai jo array wagera mainsy data filter kerny k leye hota hai or is main or bhi methods hain
                 return _.find(books, { id: args.id })
+                // return books.filter(book => book.id == args.id)
+            }
+        },
+        books: {
+            type: GraphQLList(BookType),
+            resolve(parent, args) {
+                return books
             }
         },
         author: {
@@ -49,11 +57,19 @@ const RootQuery = new GraphQLObjectType({
             resolve(parent, args) {
                 return _.find(authors, { id: args.id })
             }
+        },
+        authors: {
+            type: GraphQLList(AuthorType),
+            resolve(parent, args) {
+                return authors
+            }
         }
     }
 })
 
 
 module.exports = new GraphQLSchema({
+    name: 'Query',
+    // description:'', is main hum kuch bhi likh sakty hain
     query: RootQuery
 })
