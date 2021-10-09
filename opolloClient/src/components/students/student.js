@@ -3,7 +3,7 @@ import { useQuery, gql, useMutation } from "@apollo/client";
 import "./student.css";
 
 const getAllStudents = gql`
-	query GetAlStudents {
+	query GetAllStudents {
 		students {
 			name
 			age
@@ -32,8 +32,6 @@ const updateStudent = gql`
 const deleteStudentById = gql`
 	mutation DeleteStudent($id: Int) {
 		deleteStudent(input: { id: $id }) {
-			name
-			age
 			id
 		}
 	}
@@ -43,18 +41,21 @@ function StudentList() {
 	const [addStu] = useMutation(addStudent);
 	const [updateStu] = useMutation(updateStudent);
 	const [deleteStu] = useMutation(deleteStudentById);
-	let queryData = useQuery(getAllStudents);
-	console.log(queryData?.data?.students, "data");
-
+	
 	let [name, setName] = useState("");
 	let [age, setAge] = useState();
 	let [id, setId] = useState();
 	let [isEdit, setIsEdit] = useState(false);
-
+	
+	let queryData = useQuery(getAllStudents);
+	
 	if (queryData.loading) return <h1>loading</h1>;
 	if (queryData.error) return <h1>{queryData.error}</h1>;
 	let { students } = queryData.data;
-
+	console.log(queryData?.data?.students, "data");
+	console.log(students, "students");
+	
+	
 	function addAndUpdate(e) {
 		e.preventDefault();
 		if (!isEdit) {

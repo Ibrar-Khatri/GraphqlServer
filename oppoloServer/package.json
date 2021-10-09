@@ -13,6 +13,8 @@
     "@graphql-tools/schema": "^8.2.0",
     "apollo-server": "^3.3.0",
     "graphql": "^15.6.1",
+    "graphql-subscriptions": "^1.2.1",
+    "nodemon": "^2.0.13",
     "subscriptions-transport-ws": "^0.9.19"
   }
 }
