@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, gql, useMutation, useSubscription } from "@apollo/client";
 import "./student.css";
 
 const getAllStudents = gql`
@@ -37,25 +37,75 @@ const deleteStudentById = gql`
 	}
 `;
 
+const STUDENTADDED = gql`
+	subscription {
+		newStudent {
+			name
+			age
+			id
+		}
+	}
+`;
+const STUDENTREMOVED = gql`
+	subscription {
+		removeStud {
+			id
+		}
+	}
+`;
+// const UPDATESTUDENT = gql`
+// 	subscription {
+// 		updateStud {
+// 			id
+// 			name
+// 			age
+// 		}
+// 	}
+// `;
+
 function StudentList() {
+	const newStudent = useSubscription(STUDENTADDED);
+	const stuRemoved = useSubscription(STUDENTREMOVED);
+	// const updateStud = useSubscription(UPDATESTUDENT);
 	const [addStu] = useMutation(addStudent);
 	const [updateStu] = useMutation(updateStudent);
 	const [deleteStu] = useMutation(deleteStudentById);
-	
+
 	let [name, setName] = useState("");
 	let [age, setAge] = useState();
 	let [id, setId] = useState();
 	let [isEdit, setIsEdit] = useState(false);
-	
+
 	let queryData = useQuery(getAllStudents);
-	
+
 	if (queryData.loading) return <h1>loading</h1>;
 	if (queryData.error) return <h1>{queryData.error}</h1>;
-	let { students } = queryData.data;
-	console.log(queryData?.data?.students, "data");
-	console.log(students, "students");
-	
-	
+	let students = queryData.data.students;
+
+	if (newStudent?.data?.newStudent.name) {
+		let newStu = {
+			name: newStudent?.data?.newStudent.name,
+			age: newStudent?.data?.newStudent.age,
+			id: newStudent?.data?.newStudent.id,
+		};
+		students = [...students, newStu];
+	}
+	if (stuRemoved?.data?.removeStud.id) {
+		let index = stuRemoved?.data?.removeStud.id;
+		students = students.filter((stu) => stu.id != index);
+	}
+	// console.log(updateStud?.data?.updateStud);
+	// if (updateStud?.data?.updateStud.id) {
+	// 	let updates = updateStud?.data?.updateStud;
+	// 	students.forEach((stu) => {
+	// 		console.log(updates.name, " ", stu.name);
+	// 		if (stu.id === updates.id) {
+	// 			stu.name = updates.name;
+	// 			stu.age = updates.age;
+	// 		}
+	// 	});
+	// }
+
 	function addAndUpdate(e) {
 		e.preventDefault();
 		if (!isEdit) {

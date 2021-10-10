@@ -7,10 +7,8 @@ import client from "./config/graphqlConfig";
 function App() {
 	return (
 		<ApolloProvider client={client}>
-			
 			<StudentList />
 		</ApolloProvider>
 	);
 }
-
 export default App;
