@@ -10,6 +10,7 @@ const typeDefs = gql`
 	input stInput {
 		id: Int
 		name: String
+		age:Int
 	}
 	input updateStu {
 		id: Int

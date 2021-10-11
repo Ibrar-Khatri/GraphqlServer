@@ -24,6 +24,7 @@ const resolvers = {
 					stu.name = input.name;
 					stu.age = input.age;
 				}
+				console.log(stu)
 			});
 			pubsub.publish("UPDATESTUDENT", { updateStud: input });
 			return input;

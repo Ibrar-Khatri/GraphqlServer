@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, gql, useMutation, useSubscription } from "@apollo/client";
 import "./student.css";
 
-const getAllStudents = gql`
+const GET_ALL_STUDENTS = gql`
 	query GetAllStudents {
 		students {
 			name
@@ -11,7 +11,7 @@ const getAllStudents = gql`
 		}
 	}
 `;
-const addStudent = gql`
+const ADD_STUDENT = gql`
 	mutation AddStudent($name: String, $age: Int, $id: Int) {
 		addStudent(input: { name: $name, age: $age, id: $id }) {
 			name
@@ -20,7 +20,7 @@ const addStudent = gql`
 		}
 	}
 `;
-const updateStudent = gql`
+const UPDATE_STUDENT = gql`
 	mutation UpdateStudent($name: String, $age: Int, $id: Int) {
 		updateStudent(input: { name: $name, age: $age, id: $id }) {
 			name
@@ -29,7 +29,7 @@ const updateStudent = gql`
 		}
 	}
 `;
-const deleteStudentById = gql`
+const DELETE_STUDENT_BY_ID = gql`
 	mutation DeleteStudent($id: Int) {
 		deleteStudent(input: { id: $id }) {
 			id
@@ -53,46 +53,48 @@ const STUDENTREMOVED = gql`
 		}
 	}
 `;
-// const UPDATESTUDENT = gql`
-// 	subscription {
-// 		updateStud {
-// 			id
-// 			name
-// 			age
-// 		}
-// 	}
-// `;
+const UPDATESTUDENT = gql`
+	subscription {
+		updateStud {
+			id
+			name
+			age
+		}
+	}
+`;
 
 function StudentList() {
 	const newStudent = useSubscription(STUDENTADDED);
 	const stuRemoved = useSubscription(STUDENTREMOVED);
-	// const updateStud = useSubscription(UPDATESTUDENT);
-	const [addStu] = useMutation(addStudent);
-	const [updateStu] = useMutation(updateStudent);
-	const [deleteStu] = useMutation(deleteStudentById);
+	const updateStud = useSubscription(UPDATESTUDENT);
+	const [addStu] = useMutation(ADD_STUDENT);
+	const [updateStu] = useMutation(UPDATE_STUDENT);
+	const [deleteStu] = useMutation(DELETE_STUDENT_BY_ID);
 
 	let [name, setName] = useState("");
 	let [age, setAge] = useState();
 	let [id, setId] = useState();
 	let [isEdit, setIsEdit] = useState(false);
 
-	let queryData = useQuery(getAllStudents);
-
+	let queryData = useQuery(GET_ALL_STUDENTS);
 	if (queryData.loading) return <h1>loading</h1>;
 	if (queryData.error) return <h1>{queryData.error}</h1>;
-	let students = queryData.data.students;
+	let students = queryData?.data?.students;
 
 	if (newStudent?.data?.newStudent.name) {
 		let newStu = {
 			name: newStudent?.data?.newStudent.name,
 			age: newStudent?.data?.newStudent.age,
 			id: newStudent?.data?.newStudent.id,
-		};
-		students = [...students, newStu];
-	}
+		}
+		students= {...students, newStu}
+		// students.push(newStu)
+		}
 	if (stuRemoved?.data?.removeStud.id) {
-		let index = stuRemoved?.data?.removeStud.id;
-		students = students.filter((stu) => stu.id != index);
+		let stuID = stuRemoved?.data?.removeStud.id;
+		let updated = students.filter(stu => stu.id !== stuID)
+		students = updated
+
 	}
 	// console.log(updateStud?.data?.updateStud);
 	// if (updateStud?.data?.updateStud.id) {
